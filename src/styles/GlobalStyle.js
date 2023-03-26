@@ -1,4 +1,5 @@
 import { createGlobalStyle } from "styled-components";
+import "typeface-karla";
 
 const GlobalStyle = createGlobalStyle`
   /*
@@ -27,6 +28,9 @@ html, body {
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  background: #20262E;
+  color: #E9E8E8;
+  font-family: 'karla', sans-serif
 }
 /*
   6. Improve media defaults
