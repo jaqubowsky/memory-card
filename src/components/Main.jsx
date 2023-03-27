@@ -2,17 +2,34 @@ import { useState, useEffect } from "react";
 import usePokemonData from "../hooks/usePokemonData";
 import Loader from "./Loader/Loader";
 import { Card, CardContainer } from "./Cards";
+import Score from "./Scoreboard/Score";
+import ScoreWrapper from "./Scoreboard/ScoreWrapper";
 import StyledMain from "../styles/Main.styled";
 import { randomiseArray } from "../utils/index";
 
+const POKEMON_LIMIT = "12";
+
 function Main() {
-  const [pickedPokemons, setPickedPokemons] = useState([]);
+  const [, setPickedPokemons] = useState([]);
   const [currentScore, setCurrentScore] = useState(0);
-  const POKEMON_LIMIT = "12";
+  const [bestScore, setBestScore] = useState(0);
+
+  const updateBestScore = () => {
+    if (currentScore > bestScore) {
+      localStorage.setItem("bestScore", currentScore);
+      setBestScore(currentScore);
+    }
+  };
+
+  useEffect(() => {
+    const storedBestScore = JSON.parse(localStorage.getItem("bestScore"));
+    setBestScore(storedBestScore || 0);
+  }, []);
 
   const addPickedPokemon = (pokemonId) => {
     setPickedPokemons((prevPokemon) => {
       if (prevPokemon.includes(pokemonId)) {
+        updateBestScore();
         setCurrentScore(0);
         return [];
       }
@@ -29,18 +46,16 @@ function Main() {
   if (pokemonData !== null) {
     const randomisedPokemonData = randomiseArray(pokemonData);
 
-    const pokemonObject = randomisedPokemonData.map((pokemon) => (
-      <Card
-        handleClick={(e) => addPickedPokemon(e.currentTarget.id)}
-        name={pokemon.name}
-        img={pokemon.img}
-        key={pokemon.id}
-        id={pokemon.id}
-      />
+    const pokemonObject = randomisedPokemonData.map(({ id, name, img }) => (
+      <Card handleClick={() => addPickedPokemon(id)} name={name} img={img} key={id} id={id} />
     ));
 
     return (
       <StyledMain>
+        <ScoreWrapper>
+          <Score name="Current score:" score={currentScore} />
+          <Score name="Best score:" score={bestScore} />
+        </ScoreWrapper>
         <CardContainer>{isLoading ? <Loader /> : pokemonObject}</CardContainer>
       </StyledMain>
     );
